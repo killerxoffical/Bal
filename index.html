@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-storage-compat.js"></script> <!-- Added for file uploads -->
     
     <!-- === GOOGLE FONTS FOR CRASH GAME === -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -407,7 +408,7 @@
         .game-image-link { display: block; width: 100%; aspect-ratio: 1 / 1; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s ease-in-out; position: relative; background-color: #fff; }
         .game-image-link:hover { transform: translateY(-4px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
         .game-image-link img { width: 100%; height: 100%; object-fit: cover; }
-        .game-image-link[data-game-name="FootBall"], .game-image-link[data-game-name="Color Matrix"], .game-image-link[data-game-name="Lucky Jet"], .game-image-link[data-game-name="Mines Tower"], .game-image-link[data-game-name="Mines"] { cursor: pointer; }
+        .game-image-link[data-game-name="FootBall"], .game-image-link[data-game-name="Color Matrix"], .game-image-link[data-game-name="Lucky Jet"], .game-image-link[data-game-name="Mines"] { cursor: pointer; }
         .game-item-name { margin-top: 10px; font-size: 0.95rem; font-weight: 600; color: var(--dark-text); }
         .game-image-link.coming-soon { filter: grayscale(80%); opacity: 0.7; pointer-events: none; cursor: not-allowed; }
         .game-image-link.coming-soon::after { content: 'COMING SOON'; position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background-color: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; z-index: 1; }
@@ -492,6 +493,37 @@
             font-size: 1.4rem;
             font-weight: 700;
             text-transform: uppercase;
+        }
+        .account-info-main {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .account-username-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .kyc-badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .kyc-badge.unverified {
+            background-color: var(--red-color);
+            color: white;
+        }
+        .kyc-badge.pending {
+            background-color: var(--orange-color);
+            color: white;
+        }
+        .kyc-badge.verified {
+            background-color: var(--primary-green);
+            color: white;
+            pointer-events: none; /* Can't click if verified */
         }
         .uid-badge { 
             background: var(--orange-color); 
@@ -813,7 +845,7 @@
         .page-fade-in { animation: page-fade-in 0.4s ease-in-out forwards; }
         .page-fade-out { animation: page-fade-out 0.4s ease-in-out forwards; }
 
-        #daily-tasks-page, #transaction-history-page, #game-history-page, #announcement-detail-page, #game-list-page, #football-game-page, #color-matrix-page, #mines-tower-page, #crash-game-page, #mines-game-page, #wingo-game-page, #withdraw-page, #withdraw-history-page, #payment-page { 
+        #daily-tasks-page, #transaction-history-page, #game-history-page, #announcement-detail-page, #game-list-page, #football-game-page, #color-matrix-page, #crash-game-page, #mines-game-page, #wingo-game-page, #withdraw-page, #withdraw-history-page, #payment-page, #kyc-page { 
             padding-bottom: 0;
             display: flex;
             flex-direction: column;
@@ -824,7 +856,7 @@
             overflow-y: auto;
             background-color: var(--body-bg);
         }
-        #deposit-page .page-scroll-content, #payment-page .page-scroll-content {
+        #deposit-page .page-scroll-content, #payment-page .page-scroll-content, #kyc-page .page-scroll-content {
              background: linear-gradient(to bottom, #fdfdff, #e8eaf6);
         }
         /* === PAGE TRANSITION & STRUCTURE STYLES (END) === */
@@ -1033,7 +1065,7 @@
         .partner-card-header { display: flex; align-items: center; font-weight: 600; margin-bottom: 15px; font-size: 1rem; }
         .partner-card-header .title-icon { font-size: 1.2rem; margin-right: 8px; color: var(--primary-green); }
         .invitation-link-area { display: flex; align-items: center; background: var(--light-bg); border-radius: 8px; padding: 5px; }
-        .invitation-link-area input { flex: 1; border: none; background: transparent; padding: 10px; color: var(--dark-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .invitation-link-area input { flex: 1; border: none; background: transparent; padding: 10px; color: var(--dark-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: bold; font-size: 1.1rem; }
         .invitation-link-area .copy-btn { background: var(--primary-green); color: white; border: none; border-radius: 6px; padding: 10px 15px; font-size: 1rem; cursor: pointer; }
         .commission-status-card { text-align: center; }
         .commission-status-card.inactive .status-content { background: linear-gradient(135deg, #e0e0e0, #bdbdbd); color: #616161; padding: 15px; border-radius: 10px;}
@@ -1844,136 +1876,6 @@
             opacity: 0.9;
         }
         /* === GAME RESULT POPUP STYLES (END) === */
-
-        /* === MINES TOWER GAME STYLES (START) === */
-        #mines-tower-page .page-scroll-content {
-            background: #0d121c;
-            color: var(--modal-text);
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-        }
-        .tower-game-container {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            gap: 10px;
-            max-width: 400px;
-            margin: 0 auto;
-            width: 100%;
-            text-align: center;
-        }
-        .tower-game-container .jackpot-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: white;
-            letter-spacing: 4px;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-            margin: 10px 0;
-        }
-        #tower-grid {
-            display: flex;
-            flex-direction: column-reverse; /* Build tower from bottom up */
-            gap: 10px;
-            position: relative;
-        }
-        .tower-level {
-            display: flex;
-            justify-content: space-around;
-            gap: 10px;
-            position: relative;
-            opacity: 0.4;
-            transition: opacity 0.3s;
-        }
-        .tower-level.active {
-            opacity: 1;
-        }
-        .tower-tile {
-            flex: 1;
-            aspect-ratio: 4 / 3;
-            background: var(--mines-bg-light);
-            border-radius: 8px;
-            transition: all 0.4s ease;
-            position: relative;
-            transform-style: preserve-3d;
-            font-size: 2rem;
-            display: grid;
-            place-items: center;
-        }
-        .tower-tile.clickable {
-            cursor: pointer;
-        }
-        .tower-tile.clickable:hover {
-            background: rgba(255,255,255,0.1);
-            transform: translateY(-3px);
-        }
-        .tower-tile.revealed {
-            transform: rotateY(180deg);
-        }
-        .tower-tile.gem {
-            background: linear-gradient(45deg, #1f4037, #99f2c8);
-            box-shadow: 0 0 20px #99f2c8;
-            color: white;
-        }
-        .tower-tile.trap {
-            background: linear-gradient(45deg, #c02425, #f0cb35);
-            box-shadow: 0 0 20px #f0cb35;
-            color: white;
-        }
-        .tower-level-multiplier {
-            position: absolute;
-            left: -35px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--gold-color);
-        }
-        .tower-game-container .tower-label {
-             font-size: 1.5rem;
-             font-weight: 700;
-             color: white;
-             margin: 10px 0;
-        }
-        .tower-betting-controls {
-            background-color: var(--mines-bg-dark);
-            padding: 10px;
-            border-radius: 12px;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .tower-info-grid {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        .tower-info-box {
-            background-color: var(--mines-bg-light);
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 0.8rem;
-            text-align: left;
-            flex: 1;
-            color: var(--modal-light-gray);
-        }
-        .tower-info-box strong {
-            display: block;
-            color: white;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-        .tower-info-box strong.next-payout {
-            color: var(--gold-color);
-            font-size: 1.1rem;
-        }
-        #tower-action-btn.cashout {
-            background: var(--orange-color);
-            color: white;
-        }
-        /* === MINES TOWER GAME STYLES (END) === */
         
         /* === NEW MINES GAME STYLES (START) === */
         #mines-game-page .page-scroll-content {
@@ -2771,6 +2673,89 @@
         /* END: WINGO GAME & WITHDRAWAL STYLES                     */
         /* ======================================================= */
 
+        /* === KYC VERIFICATION PAGE STYLES (NEW) === */
+        #kyc-page .page-scroll-content {
+            padding: 15px;
+        }
+        .kyc-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+        }
+        .kyc-card h3 {
+            margin: 0 0 15px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .kyc-card p.info-text {
+            font-size: 0.9rem;
+            color: var(--gray-text);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .kyc-input-group {
+            margin-bottom: 15px;
+        }
+        .kyc-input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        .kyc-input-group input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            caret-color: var(--primary-green);
+        }
+        .kyc-file-input-wrapper {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .kyc-file-input-wrapper:hover {
+            border-color: var(--primary-green);
+            background-color: #f7f8fa;
+        }
+        .kyc-file-input-wrapper i {
+            font-size: 2rem;
+            color: var(--gray-text);
+            margin-bottom: 10px;
+        }
+        .kyc-file-input-wrapper p {
+            margin: 0;
+            font-weight: 500;
+            color: var(--dark-text);
+        }
+        .kyc-file-input-wrapper .file-name {
+            font-size: 0.8rem;
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        .kyc-passport-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            background: #0088cc;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            gap: 10px;
+        }
     </style>
     <!-- === STYLES (END) === -->
 </head>
@@ -3186,52 +3171,6 @@
             </div>
         </div>
         <!-- === COLOR MATRIX GAME PAGE (END) === -->
-
-        <!-- === MINES TOWER GAME PAGE (START) === -->
-        <div id="mines-tower-page" class="auth-page hidden">
-             <div class="sticky-header">
-                <div class="back-btn" data-target="dashboard"><i class="fas fa-arrow-left"></i></div>
-                Mines Tower
-            </div>
-            <div class="page-scroll-content">
-                <div class="tower-game-container">
-                    <h1 class="jackpot-title">JACKPOT</h1>
-                    <div id="tower-grid">
-                        <!-- Tower levels will be injected by JS -->
-                    </div>
-                    <h2 class="tower-label">TOWER</h2>
-                    <div class="tower-betting-controls">
-                        <div class="tower-info-grid">
-                            <div class="tower-info-box">
-                                Balance
-                                <strong id="tower-bet-balance-display">৳0.00</strong>
-                            </div>
-                             <div class="tower-info-box">
-                                Tower ID
-                                <strong id="tower-id-display">#...</strong>
-                            </div>
-                        </div>
-                        <div class="tower-info-grid">
-                            <div class="tower-info-box">
-                                Next Payout
-                                <strong class="next-payout" id="tower-next-payout">0.00x</strong>
-                            </div>
-                            <div class="tower-info-box">
-                                Current Winnings
-                                <strong id="tower-current-winnings">৳0.00</strong>
-                            </div>
-                        </div>
-                        <div class="tower-bet-area">
-                            <button class="mines-bet-adjust-btn" id="tower-bet-minus">-</button>
-                            <div id="tower-bet-amount-display">30</div>
-                            <button class="mines-bet-adjust-btn" id="tower-bet-plus">+</button>
-                        </div>
-                        <button id="tower-action-btn" class="btn btn-primary">PLAY</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- === MINES TOWER GAME PAGE (END) === -->
         
         <!-- === MINES GAME PAGE (START) === -->
         <div id="mines-game-page" class="auth-page hidden">
@@ -3312,7 +3251,7 @@
             </div>
             <div class="partner-content">
                 <div class="partner-card">
-                    <div class="partner-card-header"><i class="fas fa-link title-icon"></i><span>Invitation Link</span></div>
+                    <div class="partner-card-header"><i class="fas fa-link title-icon"></i><span>Referral Code</span></div>
                     <div class="invitation-link-area">
                         <input type="text" id="invitation-link-input" value="Please log in" readonly>
                         <button class="copy-btn" id="invitation-link-copy-btn"><i class="far fa-copy"></i></button>
@@ -3348,10 +3287,10 @@
                      <table class="rules-table">
                          <thead><tr><th>When Player A Deposits</th><th>You Get Bonus</th></tr></thead>
                          <tbody>
-                             <tr><td>৳300 ≤ Amount < ৳1,000</td><td>৳5</td></tr>
-                             <tr><td>৳1,000 ≤ Amount < ৳5,000</td><td>৳20</td></tr>
-                             <tr><td>৳5,000 ≤ Amount < ৳10,000</td><td>৳30</td></tr>
-                             <tr><td>৳10,000 ≤ Amount < ৳50,000</td><td>৳150</td></tr>
+                             <tr><td>৳300 ≤ Amount < ৳1,000</td><td>৳30</td></tr>
+                             <tr><td>৳1,000 ≤ Amount < ৳5,000</td><td>৳50</td></tr>
+                             <tr><td>৳5,000 ≤ Amount < ৳10,000</td><td>৳150</td></tr>
+                             <tr><td>৳10,000 ≤ Amount ≤ ৳50,000</td><td>৳1,500</td></tr>
                          </tbody>
                      </table>
                 </div>
@@ -3383,7 +3322,6 @@
         <!-- === WALLET PAGE (START) === -->
         <div id="wallet-page" class="auth-page hidden" style="padding-bottom: 0;">
              <div class="wallet-header-green">
-                <div class="back-btn" data-target="dashboard"><i class="fas fa-arrow-left"></i></div>
                 <h2>Wallet</h2>
                 <div class="wallet-icon"><i class="fas fa-wallet"></i></div>
                 <p class="total-balance-amount" id="wallet-total-balance">৳0.00</p>
@@ -3435,10 +3373,15 @@
         <div id="account-page" class="auth-page hidden">
             <div class="account-header-v2">
                 <img id="account-avatar" class="account-avatar" src="" alt="Avatar">
-                <div class="account-info-details">
-                    <h3 id="account-username"></h3>
-                    <span class="uid-badge">UID: <span id="account-uid"></span><i class="far fa-copy" id="uid-copy-icon"></i></span>
-                    <p class="last-login-text">Last Login: <span id="last-login"></span></p>
+                <div class="account-info-main">
+                    <div class="account-username-wrapper">
+                        <h3 id="account-username"></h3>
+                        <span id="kyc-badge-container"></span>
+                    </div>
+                    <div class="account-info-details">
+                        <span class="uid-badge">UID: <span id="account-uid"></span><i class="far fa-copy" id="uid-copy-icon"></i></span>
+                        <p class="last-login-text">Last Login: <span id="last-login"></span></p>
+                    </div>
                 </div>
             </div>
             <div class="account-content-v2">
@@ -3462,6 +3405,49 @@
             </div>
         </div>
         <!-- === ACCOUNT PAGE (END) === -->
+
+        <!-- === KYC VERIFICATION PAGE (NEW) (START) === -->
+        <div id="kyc-page" class="auth-page hidden">
+            <div class="sticky-header">
+                <div class="back-btn" data-target="account"><i class="fas fa-arrow-left"></i></div>
+                KYC Verification
+            </div>
+            <div class="page-scroll-content">
+                <div id="kyc-nid-section">
+                    <div class="kyc-card">
+                        <h3>NID Verification</h3>
+                        <p class="info-text">Please upload clear photos of the front and back of your National ID card and enter your NID number.</p>
+                        <form id="kyc-form">
+                            <div class="kyc-input-group">
+                                <label for="kyc-nid-front">NID Front Side</label>
+                                <label for="kyc-nid-front-input" class="kyc-file-input-wrapper">
+                                    <i class="fas fa-camera"></i>
+                                    <p>Tap to upload photo</p>
+                                    <span class="file-name" id="kyc-nid-front-filename">No file chosen</span>
+                                </label>
+                                <input type="file" id="kyc-nid-front-input" class="hidden" accept="image/*">
+                            </div>
+                            <div class="kyc-input-group">
+                                <label for="kyc-nid-back">NID Back Side</label>
+                                <label for="kyc-nid-back-input" class="kyc-file-input-wrapper">
+                                    <i class="fas fa-camera"></i>
+                                    <p>Tap to upload photo</p>
+                                    <span class="file-name" id="kyc-nid-back-filename">No file chosen</span>
+                                </label>
+                                <input type="file" id="kyc-nid-back-input" class="hidden" accept="image/*">
+                            </div>
+                             <div class="kyc-input-group">
+                                <label for="kyc-nid-number">NID Number</label>
+                                <input type="text" id="kyc-nid-number" placeholder="Enter your NID number" inputmode="numeric">
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="kyc-submit-btn" style="margin-top: 10px;">Submit for Review</button>
+                        </form>
+                    </div>
+                </div>              
+            </div>
+        </div>
+        <!-- === KYC VERIFICATION PAGE (NEW) (END) === -->
+
 
         <!-- === DAILY TASKS / ACTIVITY AWARD PAGE (START) === -->
         <div id="daily-tasks-page" class="auth-page hidden">
@@ -3508,7 +3494,7 @@
                     <h4 class="deposit-card-title">Select Payment Channel</h4>
                     <div class="payment-channels-grid" id="payment-channels-grid">
                         <div class="payment-channel-card selected" data-channel="Nagad">
-                            <img src="data:image/png;base64,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_GqXwlA5x7CoFjNROyGkh7IVXEEqcB3U4qi-c5SkxBKCQbXFBwVwzIVDz_VEXb4XvaS3LIOr-8VZ78G_B_8A1fao2dtq-1rNfR_3h4625Ic_h7p4UaJEiRIlSpQoUaJEiRIlSpQoUaJYiPX_nd8L5rNttmAAAAAElFTkSuQmCC" alt="Nagad">
+                            <img src="https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/uploads%2Fdownload%20(26).png?alt=media&token=d3a70815-9bfb-4615-b110-41450e4c323c" alt="Nagad">
                             <span>Nagad</span>
                         </div>
                     </div>
@@ -3859,9 +3845,17 @@
         // ------------------------------------------------
 
         // --- GLOBAL CONFIG & INITIALIZATION (START) ===
-        const firebaseConfig = { apiKey: "AIzaSyAQ1ePbaT_V7erqRWqi_GZiX9GQ0PpW_rk", authDomain: "ng-mod-mini-server.firebaseapp.com", databaseURL: "https://ng-mod-mini-server-default-rtdb.firebaseio.com", projectId: "ng-mod-mini-server" };
+        // IMPORTANT: Added storageBucket to fix the upload error from the screenshot.
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAQ1ePbaT_V7erqRWqi_GZiX9GQ0PpW_rk", 
+            authDomain: "ng-mod-mini-server.firebaseapp.com", 
+            databaseURL: "https://ng-mod-mini-server-default-rtdb.firebaseio.com", 
+            projectId: "ng-mod-mini-server",
+            storageBucket: "ng-mod-mini-server.appspot.com" // This line fixes the "no default bucket" error
+        };
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const db = firebase.database();
+        const storage = firebase.storage(); // Initialize Firebase Storage
         const currentAppVersion = "4.0"; // Current version of this app
         const avatarUrls = ['https://basantclub.net/assets/png/16-cf8e1441.png', 'https://basantclub.net/assets/png/11-925c456e.png', 'https://basantclub.net/assets/png/10-29a6603e.png', 'https://basantclub.net/assets/png/7-00479cfa.png', 'https://basantclub.net/assets/png/8-ea087ede.png', 'https://basantclub.net/assets/png/5-ab77b716.png', 'https://basantclub.net/assets/png/1-a6662edb.png'];
        
@@ -3884,13 +3878,13 @@
             gameList: document.getElementById('game-list-page'),
             footballGame: document.getElementById('football-game-page'),
             'color-matrix': document.getElementById('color-matrix-page'),
-            minesTower: document.getElementById('mines-tower-page'),
             'crash-game': document.getElementById('crash-game-page'),
             'mines-game': document.getElementById('mines-game-page'),
             // --- NEW PAGES FOR WINGO INTEGRATION ---
             wingoGame: document.getElementById('wingo-game-page'),
             withdraw: document.getElementById('withdraw-page'),
             withdrawHistory: document.getElementById('withdraw-history-page'),
+            kyc: document.getElementById('kyc-page'), // New KYC page
         };
         const chatPage = document.getElementById('chat-page');
         const promoModalOverlay = document.getElementById('promo-modal-overlay');
@@ -3914,9 +3908,8 @@
             lottery: [
                 { name: 'Crash', imageUrl: 'https://imgproxy.v1.bundlecdn.com/unsafe/casino_home_2x/plain/https://v1.bundlecdn.com/casino-images/100hp/6a61a18f-9551-4f10-8505-bda9799c8ea8_horizontal.png@avif', comingSoon: false },
                 { name: 'Wingo Mall', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzsrCE05x8N1gvKUKjKQ_mm8o-gH1xBHpqlQFbqWztxya6C0Yks28wvhV_&s=10', comingSoon: false },
-                { name: 'Mines Tower', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSusqqRka2tUPXKkeJElZQ9e5hbL7zWOkl8CJlf9cvXCA&s', comingSoon: false },
-                { name: 'Mines', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLKaOrSrvfizwwSQip_t0k9RxKwdYYs2Cur7RBcf8T-lMEy7BZAcyhp3w&s=10', comingSoon: false },
-                { name: 'Color Matrix', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSC-u178yqFMneDs4_7RmU4trAMJ85VY0uUQ&s', comingSoon: false }
+                { name: 'Color Matrix', imageUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/29/c5/2e/29c52eea-38e5-7943-dd5d-fe6e473c6a67/AppIcon-0-0-1x_U007emarketing-0-7-0-0-85-220.png/512x512bb.jpg', comingSoon: false },
+                { name: 'Mines', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLKaOrSrvfizwwSQip_t0k9RxKwdYYs2Cur7RBcf8T-lMEy7BZAcyhp3w&s=10', comingSoon: false }
             ],
             sports: [
                 { name: 'Cricket', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQalK9Tyv594MDAUKGEanSbdDrQcr9lFIZZzJyEBhqIZqqBpENUWgQCioc&s=10', comingSoon: true },
@@ -3932,7 +3925,6 @@
         const gamePageMappings = {
             'crash-game': { name: 'Crash', imageUrl: 'https://imgproxy.v1.bundlecdn.com/unsafe/casino_home_2x/plain/https://v1.bundlecdn.com/casino-images/100hp/6a61a18f-9551-4f10-8505-bda9799c8ea8_horizontal.png@avif' },
             'color-matrix': { name: 'Color Matrix', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSC-u178yqFMneDs4_7RmU4trAMJ85VY0uUQ&s' },
-            'minesTower': { name: 'Mines Tower', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSusqqRka2tUPXKkeJElZQ9e5hbL7zWOkl8CJlf9cvXCA&s' },
             'footballGame': { name: 'FootBall', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRE5yO8fqRB_ha42xOpSb2YVt7WXIL-VRi0QQ&s' },
             'mines-game': { name: 'Mines', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLKaOrSrvfizwwSQip_t0k9RxKwdYYs2Cur7RBcf8T-lMEy7BZAcyhp3w&s=10' },
             'wingoGame': { name: 'Wingo Mall', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzsrCE05x8N1gvKUKjKQ_mm8o-gH1xBHpqlQFbqWztxya6C0Yks28wvhV_&s=10' },
@@ -3952,7 +3944,7 @@
         
         // --- FOOTBALL GAME VARIABLES (REWRITTEN V2) ---
         const footballTeamNames = ["Dhaka Abahani", "Bashundhara Kings", "Sheikh Jamal DC", "Chittagong Abahani", "Mohammedan SC", "Saif SC", "Sheikh Russel KC", "Rahmatganj MFS", "Muktijoddha Sangsad", "Brothers Union", "Arambagh KS", "Uttar Baridhara", "Police FC", "Swadhinata KS", "Fortis FC", "Azampur FC", "Real Madrid", "FC Barcelona", "Man United", "Liverpool FC", "Bayern Munich", "Paris SG", "Juventus FC", "AC Milan", "Inter Milan", "Arsenal FC", "Chelsea FC", "Man City", "Atletico Madrid", "Borussia Dortmund", "AFC Ajax", "FC Porto", "SL Benfica", "Celtic FC", "Rangers FC", "Napoli", "Lazio", "Feyenoord", "PSV Eindhoven", "Sporting CP"];
-        const footballTeamLogos = { "Man United": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(4).jpeg?alt=media&token=cbb6dc03-d973-46d4-be93-b8105458057b", "Napoli": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(13).jpeg?alt=media&token=079fa3b3-3d93-41f3-a210-f53bb0005bd9", "Real Madrid": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(2).png?alt=media&token=2ac9003f-0e0a-4403-90a6-60c0c070e522", "Bayern Munich": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(5).jpeg?alt=media&token=9d5a64e5-33f0-405e-975d-f0d47f56a675", "AFC Ajax": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(14).png?alt=media&token=9f4b1714-b844-4f90-8138-790346545321", "Uttar Baridhara": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fimages%20(2).png?alt=media&token=043c55bf-1e06-4c06-a5fe-10cc2545f77e", "Dhaka Abahani": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(22).png?alt=media&token=f8caff43-1b48-4a55-9682-9c7d2f310660", "Muktijoddha Sangsad": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(7).png?alt=media&token=55102bee-3ac6-4879-9e13-6dcd0e52635a", "Liverpool FC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(1).png?alt=media&token=d2c6c203-cb41-440d-8e8e-c2896f6bd21b", "FC Barcelona": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(3).png?alt=media&token=d0f7aadd-325f-4cc9-b58e-bf15074d60f3", "Paris SG": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(10).png?alt=media&token=95af057d-315f-407e-a22c-a5b652c441e9", "Juventus FC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(10).jpeg?alt=media&token=48668821-805d-418d-b979-36d5ce8a19ae", "Inter Milan": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(11).jpeg?alt=media&token=3625d6c0-9cc0-4ab0-95bd-8b7316a8dc07", "AC Milan": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fimages%20(26).jpeg?alt=media&token=921deccc-554a-4814-8585-e5f0f0112a87", "Arsenal FC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(17).png?alt=media&token=b5f6c95b-f9d3-4c7a-8bb0-64cfdc65eebe", "Chelsea FC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(18).png?alt=media&token=330f192b-8d9f-4563-b653-be39bdf", "Man City": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(19).png?alt=media&token=9fdacc5e-5ba5-485e-be36-27bc680b6711", "Atletico Madrid": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(20).png?alt=media&token=fc8d5d78-3d7a-401c-a4a8-d0eef3759dc6", "Borussia Dortmund": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(16).png?alt=media&token=760646ca-14eb-4fc7-bf80-d803e0ca2990", "FC Porto": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(11).png?alt=media&token=3fe96f77-d56e-4d18-a56a-230f46e0ae07", "SL Benfica": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(12).jpeg?alt=media&token=b9fb5a03-444c-46ec-98a7-715005714e4d", "Celtic FC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(12).png?alt=media&token=4cf2ce08-0cfe-4761-ba19-252aba96dcb9", "Rangers FC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(13).png?alt=media&token=428826cf-61a5-4718-8054-ce0ebbb72f2a", "Feyenoord": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(15).jpeg?alt=media&token=1004389f-49ac-4d6e-b0ca-1f40db52d495", "PSV Eindhoven": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(16).jpeg?alt=media&token=17394468-ee87-49e3-95d3-952feff3835e", "Sporting CP": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(15).png?alt=media&token=cc2e1594-1dc3-4a63-87b2-7e7670fb0703", "Lazio": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(14).jpeg?alt=media&token=26a4f748-24eb-4d38-9a06-b76d2faba0c7", "Bashundhara Kings": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(21).png?alt=media&token=74bdb7c3-1e32-48d8-af07-de315958c247", "Sheikh Jamal DC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(23).png?alt=media&token=e2b057a8-2a58-4113-830b-c88aa61b4e6a", "Chittagong Abahani": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(24).png?alt=media&token=6cb275cd-65fa-42e1-b1fd-8794c12aecf0", "Mohammedan SC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(25).png?alt=media&token=118d0135-247e-4436-8f88-2f9a650d0c0a", "Saif SC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(4).png?alt=media&token=9a232395-d0dd-44f4-b3f8-ec11e4843f11", "Sheikh Russel KC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(5).png?alt=media&token=7b3b3607-f25b-4fc0-a631-d5940ff564b7", "Rahmatganj MFS": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(6).png?alt=media&token=ab16b699-2c41-4d06-b0a2-5e1a821a84f9", "Brothers Union": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(8).png?alt=media&token=051c8c6c-28a8-4cd1-8fd0-3f5fcf1ba747", "Arambagh KS": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(9).png?alt=media&token=583066bc-27b1-4406-9126-1b88a3cb60e0" };
+        const footballTeamLogos = { "Man United": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(4).jpeg?alt=media&token=cbb6dc03-d973-46d4-be93-b8105458057b", "Napoli": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(13).jpeg?alt=media&token=079fa3b3-3d93-41f3-a210-f53bb0005bd9", "Real Madrid": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(2).png?alt=media&token=2ac9003f-0e0a-4403-90a6-60c0c070e522", "Bayern Munich": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(5).jpeg?alt=media&token=9d5a64e5-33f0-405e-975d-f0d47f56a675", "AFC Ajax": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(14).png?alt=media&token=9f4b3714-b844-4f90-8138-790346545321", "Uttar Baridhara": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fimages%20(2).png?alt=media&token=043c55bf-1e06-4c06-a5fe-10cc2545f77e", "Dhaka Abahani": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(22).png?alt=media&token=f8caff43-1b48-4a55-9682-9c7d2f310660", "Muktijoddha Sangsad": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(7).png?alt=media&token=55102bee-3ac6-4879-9e13-6dcd0e52635a", "Liverpool FC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(1).png?alt=media&token=d2c6c203-cb41-440d-8e8e-c2896f6bd21b", "FC Barcelona": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(3).png?alt=media&token=d0f7aadd-325f-4cc9-b58e-bf15074d60f3", "Paris SG": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(10).png?alt=media&token=95af057d-315f-407e-a22c-a5b652c441e9", "Juventus FC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(10).jpeg?alt=media&token=48668821-805d-418d-b979-36d5ce8a19ae", "Inter Milan": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(11).jpeg?alt=media&token=3625d6c0-9cc0-4ab0-95bd-8b7316a8dc07", "AC Milan": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fimages%20(26).jpeg?alt=media&token=921deccc-554a-4814-8585-e5f0f0112a87", "Arsenal FC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(17).png?alt=media&token=b5f6c95b-f9d3-4c7a-8bb0-64cfdc65eebe", "Chelsea FC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(18).png?alt=media&token=330f192b-8d9f-4563-b653-be39bdf", "Man City": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(19).png?alt=media&token=9fdacc5e-5ba5-485e-be36-27bc680b6711", "Atletico Madrid": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(20).png?alt=media&token=fc8d5d78-3d7a-401c-a4a8-d0eef3759dc6", "Borussia Dortmund": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(16).png?alt=media&token=760646ca-14eb-4fc7-bf80-d803e0ca2990", "FC Porto": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(11).png?alt=media&token=3fe96f77-d56e-4d18-a56a-230f46e0ae07", "SL Benfica": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(12).jpeg?alt=media&token=b9fb5a03-444c-46ec-98a7-715005714e4d", "Celtic FC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(12).png?alt=media&token=4cf2ce08-0cfe-4761-ba19-252aba96dcb9", "Rangers FC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(13).png?alt=media&token=428826cf-61a5-4718-8054-ce0ebbb72f2a", "Feyenoord": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(15).jpeg?alt=media&token=1004389f-49ac-4d6e-b0ca-1f40db52d495", "PSV Eindhoven": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(16).jpeg?alt=media&token=17394468-ee87-49e3-95d3-952feff3835e", "Sporting CP": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(15).png?alt=media&token=cc2e1594-1dc3-4a63-87b2-7e7670fb0703", "Lazio": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(14).jpeg?alt=media&token=26a4f748-24eb-4d38-9a06-b76d2faba0c7", "Bashundhara Kings": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(21).png?alt=media&token=74bdb7c3-1e32-48d8-af07-de315958c247", "Sheikh Jamal DC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(23).png?alt=media&token=e2b057a8-2a58-4113-830b-c88aa61b4e6a", "Chittagong Abahani": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(24).png?alt=media&token=6cb275cd-65fa-42e1-b1fd-8794c12aecf0", "Mohammedan SC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(25).png?alt=media&token=118d0135-247e-4436-8f88-2f9a650d0c0a", "Saif SC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(4).png?alt=media&token=9a232395-d0dd-44f4-b3f8-ec11e4843f11", "Sheikh Russel KC": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(5).png?alt=media&token=7b3b3607-f25b-4fc0-a631-d5940ff564b7", "Rahmatganj MFS": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(6).png?alt=media&token=ab16b699-2c41-4d06-b0a2-5e1a821a84f9", "Brothers Union": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(8).png?alt=media&token=051c8c6c-28a8-4cd1-8fd0-3f5fcf1ba747", "Arambagh KS": "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/Football%20logo%2Fdownload%20(9).png?alt=media&token=583066bc-27b1-4406-9126-1b88a3cb60e0" };
         let footballGameTimerInterval = null;
         let currentFootballRoundData = null;
         let currentUserFootballBet = null;
@@ -3962,16 +3954,12 @@
         const footballPayoutMultipliers = { low: 3, mid: 10, high: 1000 };
         // --- END FOOTBALL GAME VARIABLES ---
 
-        // --- MINES TOWER VARIABLES (START) ---
-        let minesTowerState = {phase: 'BETTING', betAmount: 30, currentLevel: 0, currentMultiplier: 1, winnings: 0, towerLogic: []};
-        const TOWER_LEVELS = 5; const TILES_PER_LEVEL = 3; const TOWER_MULTIPLIERS = [1.00, 1.25, 1.60, 2.10, 2.80, 5.00]; const MINES_BET_STEPS = [30, 50, 100, 200, 500, 1000, 2000, 5000];
-        // --- MINES TOWER VARIABLES (END) ---
-
         // --- NEW MINES GAME VARIABLES (START) ---
         let minesGameState = { phase: 'BETTING', betAmount: 30, minesLocations: [], revealedTiles: [], currentMultiplier: 1.0, gemsFound: 0, roundId: null };
         let minesGameCountdownInterval = null;
         const MINES_IN_GRID = 5;
         const MINES_GRID_SIZE = 5;
+        const MINES_BET_STEPS = [30, 50, 100, 200, 500, 1000, 2000, 5000];
         // --- NEW MINES GAME VARIABLES (END) ---
 
         // --- MISSION VARIABLES (START) ===
@@ -4025,7 +4013,7 @@
                 } else { 
                     banOverlay.classList.add('hidden'); 
                     const pagesWithoutNav = ['login', 'register']; 
-                    const gamePageIds = ['footballGame', 'color-matrix', 'minesTower', 'crash-game', 'mines-game', 'wingoGame']; 
+                    const gamePageIds = ['footballGame', 'color-matrix', 'crash-game', 'mines-game', 'wingoGame']; 
                     const currentPageEl = Object.values(pages).find(p => p && !p.classList.contains('hidden')); 
                     const currentPageId = currentPageEl ? Object.keys(pages).find(key => pages[key] === currentPageEl) : null; 
                     if(currentPageId && !pagesWithoutNav.includes(currentPageId) && !gamePageIds.includes(currentPageId)){ 
@@ -4090,7 +4078,6 @@
 
                     if (pageId === 'footballGame') initializeFootballGamePage();
                     else if (pageId === 'color-matrix') initializeColorMatrixGame();
-                    else if (pageId === 'minesTower') initializeMinesTowerGame();
                     else if (pageId === 'crash-game') initializeCrashGame();
                     else if (pageId === 'mines-game') initializeMinesGame();
                     else if (pageId === 'wingoGame') initializeWingoGame();
@@ -4107,7 +4094,7 @@
             setTimeout(() => { if (isPageTransitioning) { console.warn("Page transition flag reset by safety timer."); isPageTransitioning = false; } }, 1500);
 
             if (!pageId || !pages[pageId]) { pageId = 'login'; } // Default to login if unknown
-            const gamePageIds = ['footballGame', 'color-matrix', 'minesTower', 'crash-game', 'mines-game', 'wingoGame']; 
+            const gamePageIds = ['footballGame', 'color-matrix', 'crash-game', 'mines-game', 'wingoGame']; 
             if (gamePageIds.includes(pageId)) { showGameLoaderAndTransition(pageId); return; } 
             isPageTransitioning = true; 
             const currentPageEl = Object.values(pages).find(p => p && !p.classList.contains('hidden')); 
@@ -4127,7 +4114,7 @@
             if(footballFooter) footballFooter.classList.toggle('hidden', pageId !== 'footballGame' || document.getElementById('football-betting-view').classList.contains('hidden')); 
             bottomNav.classList.toggle('hidden', pagesWithoutNav.includes(pageId)); 
             globalChatBtn.classList.toggle('hidden', pagesWithoutNav.includes(pageId) || gamePageIds.includes(pageId)); 
-            if (!pagesWithoutNav.includes(pageId)) { if (!['deposit', 'payment', 'transactionHistory', 'gameHistory', 'announcementDetail', 'gameList', 'withdraw', 'withdrawHistory'].includes(pageId)) { sessionStorage.setItem('lastActivePage', pageId); } } 
+            if (!pagesWithoutNav.includes(pageId)) { if (!['deposit', 'payment', 'transactionHistory', 'gameHistory', 'announcementDetail', 'gameList', 'withdraw', 'withdrawHistory', 'kyc'].includes(pageId)) { sessionStorage.setItem('lastActivePage', pageId); } } 
             if (currentPageEl) { currentPageEl.classList.add('page-fade-out'); } 
             setTimeout(() => { if (currentPageEl) { currentPageEl.classList.add('hidden'); currentPageEl.classList.remove('page-fade-out'); } 
             if (newPage) { newPage.scrollTop = 0; if(newPage.querySelector('.page-scroll-content')) { newPage.querySelector('.page-scroll-content').scrollTop = 0; } 
@@ -4154,7 +4141,6 @@
             if(gameLink) { e.preventDefault(); const gameName = gameLink.dataset.gameName; 
                 if(gameName === 'FootBall') showPage('footballGame'); 
                 else if (gameName === 'Color Matrix') showPage('color-matrix'); 
-                else if (gameName === 'Mines Tower') showPage('minesTower'); 
                 else if (gameName === 'Crash') showPage('crash-game'); 
                 else if (gameName === 'Mines') showPage('mines-game'); 
                 else if (gameName === 'Wingo Mall') showPage('wingoGame'); 
@@ -4184,7 +4170,7 @@
         document.getElementById('wallet-deposit-history-btn').addEventListener('click', (e) => { e.preventDefault(); showPage('transactionHistory'); updateActiveNav('wallet'); });
         document.getElementById('wallet-withdrawal-history-btn').addEventListener('click', (e) => { e.preventDefault(); showPage('transactionHistory'); updateActiveNav('wallet'); });
         document.getElementById('wallet-withdraw-btn').addEventListener('click', (e) => { e.preventDefault(); showPage('withdraw'); updateActiveNav('wallet'); });
-        document.querySelector('#wallet-page .back-btn').addEventListener('click', (e) => { e.preventDefault(); showPage(e.currentTarget.dataset.target, true); updateActiveNav('dashboard'); });
+        document.querySelector('#wallet-page .back-btn')?.addEventListener('click', (e) => { e.preventDefault(); showPage(e.currentTarget.dataset.target, true); updateActiveNav('dashboard'); });
         document.getElementById('commission-to-main-transfer-btn').addEventListener('click', handleCommissionTransfer);
         document.getElementById('main-wallet-circle').addEventListener('click', handleMainToTotalTransfer);
         document.getElementById('promo-code-btn-premium').addEventListener('click', (e) => { e.preventDefault(); promoModalOverlay.classList.remove('hidden'); }); // MODIFIED
@@ -4202,11 +4188,6 @@
         document.getElementById('tasks-list-container').addEventListener('click', (e) => { const claimButton = e.target.closest('.mission-button'); if (claimButton && !claimButton.disabled) { const missionId = claimButton.dataset.missionId; if (missionId) handleClaimMissionReward(missionId); } const rulesButton = e.target.closest('.mission-rules-btn'); if(rulesButton) { const missionId = rulesButton.dataset.missionId; const mission = missionDefinitions[missionId]; if(mission && mission.rule) { showPopup(`<div class='popup-message-premium-header'><i class='fas fa-info-circle'></i> ${mission.name} Rules</div><p style="text-align:center;">${mission.rule}</p>`, '', 6000); } } });
         document.querySelector('#color-matrix-page .back-btn').addEventListener('click', (e) => { e.preventDefault(); showPage(e.currentTarget.dataset.target, true); updateActiveNav('dashboard'); });
         document.getElementById('matrix-rules-btn').addEventListener('click', () => { showPopup( `<div class='popup-message-premium-header'><i class='fas fa-info-circle'></i> How to Play Color Matrix</div> <p>1. Bet on one of the four colors within <strong>20 seconds</strong>.</p> <p>2. The color that appears most in the 5x5 grid wins.</p> <p>3. Payouts for <strong>Red, Green, Blue:</strong> Base 1.5x, plus 0.05x for each winning cell.</p> <p>4. Payout for <strong>Gold:</strong> A massive <strong>20x</strong> JACKPOT!</p>`, '', 10000); });
-        document.querySelector('#mines-tower-page .back-btn').addEventListener('click', (e) => { e.preventDefault(); showPage(e.currentTarget.dataset.target, true); updateActiveNav('dashboard'); });
-        document.getElementById('tower-action-btn').addEventListener('click', handleMinesTowerActionBtn);
-        document.getElementById('tower-bet-plus').addEventListener('click', () => adjustMinesTowerBet(1));
-        document.getElementById('tower-bet-minus').addEventListener('click', () => adjustMinesTowerBet(-1));
-        document.getElementById('tower-grid').addEventListener('click', handleMinesTowerTileClick);
         document.querySelector('#mines-game-page .back-btn').addEventListener('click', (e) => { e.preventDefault(); showPage(e.currentTarget.dataset.target, true); updateActiveNav('dashboard'); });
         document.getElementById('mines-action-btn').addEventListener('click', handleMinesActionBtn);
         document.getElementById('mines-bet-plus').addEventListener('click', () => adjustMinesBet(1));
@@ -4215,6 +4196,14 @@
         document.querySelector('#wingo-game-page .back-btn').addEventListener('click', (e) => { e.preventDefault(); showPage(e.currentTarget.dataset.target || 'dashboard', true); updateActiveNav('dashboard'); });
         document.querySelector('#withdraw-page .back-btn').addEventListener('click', (e) => { e.preventDefault(); showPage('wallet', true); updateActiveNav('wallet'); });
         document.querySelector('#withdraw-history-page .back-btn').addEventListener('click', (e) => { e.preventDefault(); showPage('withdraw', true); updateActiveNav('wallet'); });
+        
+        // --- KYC PAGE LISTENERS (NEW) ---
+        document.querySelector('#kyc-page .back-btn').addEventListener('click', (e) => { e.preventDefault(); showPage(e.currentTarget.dataset.target, true); updateActiveNav('account'); });
+        document.getElementById('account-page').addEventListener('click', (e) => { if(e.target.closest('#kyc-badge-container')) { showPage('kyc'); }});
+        document.getElementById('kyc-form').addEventListener('submit', handleKycSubmit);
+        document.getElementById('kyc-nid-front-input').addEventListener('change', (e) => { document.getElementById('kyc-nid-front-filename').textContent = e.target.files[0] ? e.target.files[0].name : 'No file chosen'; });
+        document.getElementById('kyc-nid-back-input').addEventListener('change', (e) => { document.getElementById('kyc-nid-back-filename').textContent = e.target.files[0] ? e.target.files[0].name : 'No file chosen'; });
+        
     }
     // --- PAGE NAVIGATION & EVENT LISTENERS (END) ---
    
@@ -4820,48 +4809,57 @@
         console.log(`Archived round: ${oldRoundData.roundId}`);
     }
     
-    function displayMatchesFromFirebase() {
-        if (!currentFootballRoundData || !currentFootballRoundData.matchList) return;
-        const matchListContainer = document.getElementById('football-match-list');
-        matchListContainer.innerHTML = '';
-        
-        const defaultLogo = "https://i.ibb.co/68c1pws/avatar-placeholder.png";
+    // ADD THIS NEW FUNCTION IN ITS PLACE
+function displayMatchesFromFirebase() {
+    if (!currentFootballRoundData || !currentFootballRoundData.matchList) return;
+    const matchListContainer = document.getElementById('football-match-list');
+    matchListContainer.innerHTML = '';
+    
+    // --- START: KEY CHANGES HERE ---
+    // Define the fixed logos you requested
+    const leftTeamLogo = "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/uploads%2Fimages%20(29).jpeg?alt=media&token=b23d81ac-38eb-42b6-83ee-58ed61cc0453";
+    const rightTeamLogo = "https://firebasestorage.googleapis.com/v0/b/viptask-5c1fc.appspot.com/o/uploads%2Fimages%20(3).png?alt=media&token=c1f45401-f8c4-4d6b-a814-de946da76590";
+    // --- END: KEY CHANGES HERE ---
 
-        currentFootballRoundData.matchList.forEach((match, index) => {
-            const matchKey = `match_${index}`;
-            const [team1, team2] = match;
-            const logo1 = footballTeamLogos[team1] || defaultLogo;
-            const logo2 = footballTeamLogos[team2] || defaultLogo;
-            
-            const shouldShowScore = footballGameState === 'PROCESSING_RESULTS' || footballGameState === 'ROUND_OVER';
-            const scoreText = shouldShowScore 
-                ? (currentFootballRoundData.matchScores[matchKey] || 'VS').replace('-', ' - ') 
-                : 'VS';
-            
-            const matchItem = document.createElement('div');
-            matchItem.className = 'match-item-1x2';
-            matchItem.dataset.matchId = matchKey;
-            matchItem.innerHTML = `
-                <div class="match-teams-info">
-                    <div class="match-team-display">
-                        <img src="${logo1}" alt="${team1} logo">
-                        <span>${team1}</span>
-                    </div>
-                    <div class="match-score-display">${scoreText}</div>
-                    <div class="match-team-display">
-                        <img src="${logo2}" alt="${team2} logo">
-                        <span>${team2}</span>
-                    </div>
+    currentFootballRoundData.matchList.forEach((match, index) => {
+        const matchKey = `match_${index}`;
+        const [team1, team2] = match; // Team names are still dynamic from the list
+
+        // --- START: KEY CHANGES HERE ---
+        // Assign the fixed logos, ignoring the team name
+        const logo1 = leftTeamLogo;
+        const logo2 = rightTeamLogo;
+        // --- END: KEY CHANGES HERE ---
+        
+        const shouldShowScore = footballGameState === 'PROCESSING_RESULTS' || footballGameState === 'ROUND_OVER';
+        const scoreText = shouldShowScore 
+            ? (currentFootballRoundData.matchScores[matchKey] || 'VS').replace('-', ' - ') 
+            : 'VS';
+        
+        const matchItem = document.createElement('div');
+        matchItem.className = 'match-item-1x2';
+        matchItem.dataset.matchId = matchKey;
+        matchItem.innerHTML = `
+            <div class="match-teams-info">
+                <div class="match-team-display">
+                    <img src="${logo1}" alt="${team1} logo">
+                    <span>${team1}</span>
                 </div>
-                <div class="match-betting-options">
-                    <div class="bet-option" data-match-id="${matchKey}" data-outcome="teamA">Win</div>
-                    <div class="bet-option" data-match-id="${matchKey}" data-outcome="draw">Draw</div>
-                    <div class="bet-option" data-match-id="${matchKey}" data-outcome="teamB">Win</div>
+                <div class="match-score-display">${scoreText}</div>
+                <div class="match-team-display">
+                    <img src="${logo2}" alt="${team2} logo">
+                    <span>${team2}</span>
                 </div>
-            `;
-            matchListContainer.appendChild(matchItem);
-        });
-    }
+            </div>
+            <div class="match-betting-options">
+                <div class="bet-option" data-match-id="${matchKey}" data-outcome="teamA">Win</div>
+                <div class="bet-option" data-match-id="${matchKey}" data-outcome="draw">Draw</div>
+                <div class="bet-option" data-match-id="${matchKey}" data-outcome="teamB">Win</div>
+            </div>
+        `;
+        matchListContainer.appendChild(matchItem);
+    });
+}
     
         function updateFootballBettingUI() {
         const bettingView = document.getElementById('football-betting-view');
@@ -4966,7 +4964,6 @@
             updates[`users/${currentUserData.username}/balance`] = newBalance;
             
             await db.ref().update(updates);
-            await updateUserMissionProgress('bet', betPrice);
             
             currentUserData.balance = newBalance;
             updateAccountUI(currentUserData);
@@ -5283,7 +5280,6 @@
 
             const newBalance = currentUserData.balance - amount;
             await db.ref(`users/${currentUserData.username}/balance`).set(newBalance);
-            await updateUserMissionProgress('bet', amount);
 
             currentUserData.balance = newBalance;
             updateAccountUI(currentUserData);
@@ -5353,179 +5349,7 @@
         }
     }
     // --- COLOR MATRIX GAME LOGIC (END) ===
-    
-    // --- MINES TOWER GAME LOGIC (START) ---
-    function initializeMinesTowerGame() {
-        resetMinesTower();
-    }
-
-    function buildMinesTowerGrid() {
-        const gridEl = document.getElementById('tower-grid');
-        gridEl.innerHTML = '';
-        for (let i = 0; i < TOWER_LEVELS; i++) {
-            const levelEl = document.createElement('div');
-            levelEl.className = 'tower-level';
-            levelEl.dataset.level = i;
-            
-            let tilesHTML = `<div class="tower-level-multiplier">${TOWER_MULTIPLIERS[i+1]}x</div>`;
-            for (let j = 0; j < TILES_PER_LEVEL; j++) {
-                tilesHTML += `<div class="tower-tile" data-level="${i}" data-tile="${j}"></div>`;
-            }
-            levelEl.innerHTML = tilesHTML;
-            gridEl.appendChild(levelEl);
-        }
-    }
-
-    function resetMinesTower() {
-        minesTowerState = {
-            phase: 'BETTING', betAmount: 30, currentLevel: 0, currentMultiplier: 1.00, winnings: 0, towerLogic: [], towerId: null
-        };
-        buildMinesTowerGrid();
         
-        const actionBtn = document.getElementById('tower-action-btn');
-        actionBtn.textContent = 'PLAY';
-        actionBtn.disabled = false;
-        actionBtn.classList.remove('cashout');
-        
-        document.getElementById('tower-bet-plus').disabled = false;
-        document.getElementById('tower-bet-minus').disabled = false;
-
-        updateMinesTowerInfoUI();
-    }
-    
-    function adjustMinesTowerBet(direction) {
-        if (minesTowerState.phase !== 'BETTING') return;
-        let currentIndex = MINES_BET_STEPS.indexOf(minesTowerState.betAmount);
-        if(currentIndex === -1) currentIndex = 0;
-        
-        let newIndex = currentIndex + direction;
-        if(newIndex >= 0 && newIndex < MINES_BET_STEPS.length) {
-            minesTowerState.betAmount = MINES_BET_STEPS[newIndex];
-            document.getElementById('tower-bet-amount-display').textContent = minesTowerState.betAmount;
-        }
-    }
-
-    function updateMinesTowerInfoUI() {
-        document.getElementById('tower-next-payout').textContent = `${TOWER_MULTIPLIERS[minesTowerState.currentLevel + 1] || 'MAX'}x`;
-        document.getElementById('tower-current-winnings').textContent = `৳${minesTowerState.winnings.toFixed(2)}`;
-        document.getElementById('tower-bet-amount-display').textContent = minesTowerState.betAmount;
-        document.getElementById('tower-id-display').textContent = minesTowerState.towerId ? `#${minesTowerState.towerId}` : '#...';
-        
-        document.querySelectorAll('.tower-level').forEach(level => {
-            level.classList.remove('active');
-            if (parseInt(level.dataset.level) === minesTowerState.currentLevel && minesTowerState.phase === 'CLIMBING') {
-                level.classList.add('active');
-            }
-        });
-
-        document.querySelectorAll('.tower-tile').forEach(tile => {
-            const isClickable = parseInt(tile.dataset.level) === minesTowerState.currentLevel && minesTowerState.phase === 'CLIMBING';
-            tile.classList.toggle('clickable', isClickable);
-        });
-    }
-    
-    async function handleMinesTowerActionBtn() {
-        if (!currentUserData) { showPopup("Please log in to play.", 'error'); return; }
-        const actionBtn = document.getElementById('tower-action-btn');
-
-        if (minesTowerState.phase === 'BETTING') {
-            const betAmount = minesTowerState.betAmount;
-            if (isNaN(betAmount) || betAmount <= 0) { showPopup("Invalid bet amount", "error"); return; }
-            if (currentUserData.balance < betAmount) { showPopup("Insufficient balance", "error"); return; }
-            
-            try {
-                const newBalance = currentUserData.balance - betAmount;
-                await db.ref(`users/${currentUserData.username}/balance`).set(newBalance);
-                await updateUserMissionProgress('bet', betAmount);
-
-                currentUserData.balance = newBalance;
-                updateAccountUI(currentUserData);
-                
-                minesTowerState.phase = 'CLIMBING';
-                minesTowerState.towerId = 'MT' + Date.now().toString().slice(-6);
-                
-                minesTowerState.towerLogic = [];
-                for(let i=0; i < TOWER_LEVELS; i++) {
-                    const level = [1, 1, 1];
-                    const trapIndex = Math.floor(Math.random() * TILES_PER_LEVEL);
-                    level[trapIndex] = 0;
-                    minesTowerState.towerLogic.push(level);
-                }
-                
-                document.getElementById('tower-bet-plus').disabled = true;
-                document.getElementById('tower-bet-minus').disabled = true;
-
-                actionBtn.textContent = `CASHOUT ৳0.00`;
-                actionBtn.disabled = true;
-                actionBtn.classList.add('cashout');
-                
-                updateMinesTowerInfoUI();
-                
-            } catch(e) {
-                showPopup("Error starting game. Please try again.", "error");
-            }
-
-        } else if (minesTowerState.phase === 'CLIMBING') {
-            await endMinesTowerGame(true, false);
-        }
-    }
-    
-    async function handleMinesTowerTileClick(e) {
-        const tile = e.target.closest('.tower-tile.clickable');
-        if (!tile) return;
-        
-        const level = parseInt(tile.dataset.level);
-        const tileIndex = parseInt(tile.dataset.tile);
-
-        const isGem = minesTowerState.towerLogic[level][tileIndex] === 1;
-
-        const levelTiles = document.querySelectorAll(`.tower-tile[data-level="${level}"]`);
-        levelTiles.forEach((t, index) => {
-            const type = minesTowerState.towerLogic[level][index] === 1 ? 'gem' : 'trap';
-            t.innerHTML = `<i class="fas fa-${type === 'gem' ? 'gem' : 'bomb'}"></i>`;
-            t.classList.add('revealed', type);
-        });
-
-        if (isGem) {
-            minesTowerState.currentLevel++;
-            minesTowerState.currentMultiplier = TOWER_MULTIPLIERS[minesTowerState.currentLevel];
-            minesTowerState.winnings = minesTowerState.betAmount * minesTowerState.currentMultiplier;
-            
-            const actionBtn = document.getElementById('tower-action-btn');
-            actionBtn.textContent = `CASHOUT ৳${minesTowerState.winnings.toFixed(2)}`;
-            actionBtn.disabled = false;
-
-            if (minesTowerState.currentLevel >= TOWER_LEVELS) {
-                await endMinesTowerGame(true, false);
-            } else {
-                updateMinesTowerInfoUI();
-            }
-        } else {
-            await endMinesTowerGame(false, true);
-        }
-    }
-
-    async function endMinesTowerGame(isWin, isTrap) {
-        const actionBtn = document.getElementById('tower-action-btn');
-        actionBtn.disabled = true;
-        let winnings = 0;
-        if (isWin) {
-            winnings = minesTowerState.winnings;
-            const updates = {};
-            updates[`users/${currentUserData.username}/balance`] = firebase.database.ServerValue.increment(winnings);
-            await db.ref().update(updates);
-            showPopup(`You cashed out ৳${winnings.toFixed(2)}!`, 'success', 4000);
-        } else if (isTrap) {
-            showPopup(`You hit a bomb! Game over.`, 'error', 4000);
-        }
-        
-        const status = isWin ? 'won' : 'lost';
-        await logGameBet('Mines Tower', minesTowerState.betAmount, minesTowerState.towerId, { finalLevel: minesTowerState.currentLevel, finalMultiplier: minesTowerState.currentMultiplier }, status, winnings);
-        
-        setTimeout(resetMinesTower, 3000);
-    }
-    // --- MINES TOWER GAME LOGIC (END) ---
-    
     // --- NEW MINES GAME LOGIC (START) ---
     function initializeMinesGame() {
         buildMinesGrid();
@@ -5648,7 +5472,6 @@
 
             try {
                 await db.ref().update(updates);
-                await updateUserMissionProgress('bet', betAmount);
                 
                 minesGameState.phase = 'PLAYING';
                 minesGameState.roundId = roundId;
@@ -5656,6 +5479,8 @@
                 minesGameState.revealedTiles = [];
                 minesGameState.gemsFound = 0;
                 minesGameState.currentMultiplier = 1.0;
+                
+                await logGameBet('Mines', betAmount, roundId, { mineLocations });
 
                 document.getElementById('mines-status-display').textContent = 'Find the gems!';
                 updateMinesUI();
@@ -5669,11 +5494,10 @@
             const winnings = minesGameState.betAmount * minesGameState.currentMultiplier;
             await db.ref(`users/${currentUserData.username}/balance`).set(firebase.database.ServerValue.increment(winnings));
             
-            await logGameBet('Mines', betAmount, minesGameState.roundId, { 
+            await updateUserBetStatus('Mines', minesGameState.roundId, 'won', winnings, { 
                 finalMultiplier: minesGameState.currentMultiplier, 
-                gemsFound: minesGameState.gemsFound,
-                mineLocations: minesGameState.minesLocations
-            }, 'won', winnings);
+                gemsFound: minesGameState.gemsFound
+            });
             
             showPopup(`You cashed out ৳${winnings.toFixed(2)}!`, 'success');
             endMinesGame(true, false);
@@ -5706,10 +5530,7 @@
             tile.innerHTML = `<i class="fas fa-bomb"></i>`;
             tile.classList.add('mine');
             
-            await logGameBet('Mines', minesGameState.betAmount, minesGameState.roundId, { 
-                gemsFound: minesGameState.gemsFound,
-                mineLocations: minesGameState.minesLocations
-            }, 'lost', 0);
+            await updateUserBetStatus('Mines', minesGameState.roundId, 'lost', 0, { gemsFound: minesGameState.gemsFound });
             endMinesGame(true, true);
         } else {
             tile.innerHTML = `<i class="fas fa-gem"></i>`;
@@ -5766,9 +5587,57 @@
         const username = currentUserData.username;
         const historyRef = db.ref(`users/${username}/gameHistory`);
         const newBet = { gameName, betAmount, roundId, details, status, winnings, timestamp: firebase.database.ServerValue.TIMESTAMP };
-        const newBetRef = await historyRef.push(newBet);
+        
+        const updates = {};
+        
+        const newBetRef = historyRef.push();
+        updates[`users/${username}/gameHistory/${newBetRef.key}`] = newBet;
+        
+        await updateUserMissionProgress('bet', betAmount, updates);
+        
+        if (currentUserData.invitedBy) {
+            const referrerUsername = currentUserData.invitedBy;
+            const referrerRef = db.ref(`users/${referrerUsername}`);
+            const referrerSnapshot = await referrerRef.once('value');
+            if (referrerSnapshot.exists()) {
+                const referrerData = referrerSnapshot.val();
+                if (referrerData.referrals && referrerData.referrals.commissionActive === true) {
+                    const commission = betAmount * 0.002;
+                    if (commission > 0) {
+                        updates[`users/${referrerUsername}/referrals/commissionBalance`] = firebase.database.ServerValue.increment(commission);
+                    }
+                }
+            }
+        }
+        
+        await db.ref().update(updates);
         return newBetRef.key;
     }
+    
+    async function updateUserBetStatus(gameName, roundId, status, winnings, detailsUpdate) {
+        if (!currentUserData) return;
+        const username = currentUserData.username;
+        const historyRef = db.ref(`users/${username}/gameHistory`);
+        const query = historyRef.orderByChild('roundId').equalTo(roundId);
+        const snapshot = await query.once('value');
+    
+        if (snapshot.exists()) {
+            const updates = {};
+            snapshot.forEach(child => {
+                if (child.val().gameName === gameName) {
+                    updates[`${child.key}/status`] = status;
+                    updates[`${child.key}/winnings`] = winnings;
+                    for (const key in detailsUpdate) {
+                        updates[`${child.key}/details/${key}`] = detailsUpdate[key];
+                    }
+                }
+            });
+            if (Object.keys(updates).length > 0) {
+                await historyRef.update(updates);
+            }
+        }
+    }
+
 
         async function loadAndDisplayGameHistory() {
         const container = document.getElementById('game-history-list');
@@ -5914,7 +5783,7 @@
     }
     
     async function createPendingTransaction(method, details) {
-        const username = JSON.parse(localStorage.getItem('loggedInUser'));
+        const username = currentUserData.username;
         if (!username) return;
 
         const transaction = {
@@ -5931,11 +5800,15 @@
         try {
             const trxRef = db.ref('users/' + username + '/transactions');
             await trxRef.push(transaction);
-            await updateUserMissionProgress('deposit', currentDepositState.amount);
+            
+            // This now calls the function to handle first deposit logic for the referrer
+            await handleFirstDepositBonus(currentUserData, currentDepositState.amount);
+            
             showPopup('Deposit submitted for review!', 'success');
             showPage('deposit', true); // Go back to deposit page after submission
         } catch (error) {
             showPopup('Failed to submit transaction.', 'error');
+            console.error(error);
         }
     }
     
@@ -6032,8 +5905,8 @@
     // --- CHAT & COMMUNICATION (END) ---
 
     // --- PARTNER & REWARDS (START) ---
-    function handleCopyInviteLink() { const linkInput = document.getElementById('invitation-link-input'); if (linkInput.value === 'Please log in') { showPopup('Please log in to get your link.', 'error'); return; } navigator.clipboard.writeText(linkInput.value).then(() => showPopup('Invitation link copied!', 'success'), () => showPopup('Failed to copy link.', 'error')); }
-    async function handleClaimCommission() { const claimBtn = document.getElementById('commission-claim-btn'); if (claimBtn.classList.contains('disabled')) return; const username = JSON.parse(localStorage.getItem('loggedInUser')); if (!username || !currentUserData) return; const commissionToClaim = currentUserData.referrals.commissionBalance || 0; const newTotalBalance = (currentUserData.balance || 0) + commissionToClaim; try { const userRef = db.ref('users/' + username); await userRef.update({ 'balance': newTotalBalance, 'referrals/commissionBalance': 0 }); showPopup(`Successfully claimed ৳${commissionToClaim.toFixed(2)}!`, 'success'); handleBalanceRefresh(); } catch (error) { showPopup('Failed to claim commission. Please try again.', 'error'); } }
+    function handleCopyInviteLink() { const linkInput = document.getElementById('invitation-link-input'); if (linkInput.value === 'Please log in') { showPopup('Please log in to get your code.', 'error'); return; } navigator.clipboard.writeText(linkInput.value).then(() => showPopup('Referral code copied!', 'success'), () => showPopup('Failed to copy code.', 'error')); }
+    async function handleClaimCommission() { const claimBtn = document.getElementById('commission-claim-btn'); if (claimBtn.classList.contains('disabled')) return; const username = currentUserData.username; if (!username || !currentUserData) return; const commissionToClaim = currentUserData.referrals.commissionBalance || 0; const newTotalBalance = (currentUserData.balance || 0) + commissionToClaim; try { const userRef = db.ref('users/' + username); await userRef.update({ 'balance': newTotalBalance, 'referrals/commissionBalance': 0 }); showPopup(`Successfully claimed ৳${commissionToClaim.toFixed(2)}!`, 'success'); handleBalanceRefresh(); } catch (error) { showPopup('Failed to claim commission. Please try again.', 'error'); } }
     // --- PARTNER & REWARDS (END) ---
     
     // --- AUTH & USER DATA (START) ---
@@ -6070,7 +5943,7 @@
 
     function populateAvatarModal() { const grid = document.getElementById('avatar-selection-grid'); grid.innerHTML = ''; avatarUrls.forEach(url => { const img = document.createElement('img'); img.src = url; img.dataset.url = url; img.addEventListener('click', handleAvatarSelection); grid.appendChild(img); }); }
     async function handleAvatarSelection(event) { const newAvatarUrl = event.target.dataset.url; const username = JSON.parse(localStorage.getItem('loggedInUser')); if (!username) return; const userRef = db.ref('users/' + username); try { await userRef.update({ avatarUrl: newAvatarUrl }); document.getElementById('account-avatar').src = newAvatarUrl; avatarModal.classList.add('hidden'); showPopup('Profile picture updated!', 'success'); } catch (error) { showPopup('Failed to update picture.', 'error'); } }
-    async function handleBalanceRefresh() { const icon = document.querySelector('.refresh-icon'); const username = JSON.parse(localStorage.getItem('loggedInUser')); if (!username) return; icon.classList.add('spinning'); try { await fetchAndUpdateUserData(username); if(currentUserData) { showPopup('Balance updated!', 'success'); if (!pages.wingoGame.classList.contains('hidden')) { G.user.balance = currentUserData.balance; if(typeof renderBalance === 'function') { renderBalance(); } } } } catch(e) { showPopup('Could not refresh balance.', 'error'); } finally { setTimeout(() => icon.classList.remove('spinning'), 500); } }
+    async function handleBalanceRefresh() { const icon = document.querySelector('.refresh-icon'); const username = currentUserData.username; if (!username) return; icon.classList.add('spinning'); try { await fetchAndUpdateUserData(username); if(currentUserData) { showPopup('Balance updated!', 'success'); if (!pages.wingoGame.classList.contains('hidden')) { G.user.balance = currentUserData.balance; if(typeof renderBalance === 'function') { renderBalance(); } } } } catch(e) { showPopup('Could not refresh balance.', 'error'); } finally { setTimeout(() => icon.classList.remove('spinning'), 500); } }
     function handleCopyUid() { const uid = document.getElementById('account-uid').textContent; navigator.clipboard.writeText(uid).then(() => showPopup('UID copied!', 'success'), () => showPopup('Failed to copy.', 'error')); }
     function handleLogout(message = "You have logged out.") {  
         showPopup(message, 'success');
@@ -6087,21 +5960,44 @@
     function showGameResultPopup(game, isWin, message, details = '', duration = 5000) { let container; if (game === 'matrix') { container = document.getElementById('matrix-result-popup-container'); } else if (game === 'crash') { container = document.getElementById('crash-result-popup-container'); } if(!container) return; container.innerHTML = ''; const popup = document.createElement('div'); popup.className = isWin ? 'game-result-popup win' : 'game-result-popup loss'; const iconClass = isWin ? 'fa-solid fa-trophy' : 'fa-solid fa-face-frown'; popup.innerHTML = ` <i class="${iconClass} result-icon"></i> <div class="result-text">${message}</div> ${details ? `<div class="result-details">${details}</div>` : ''} `; container.appendChild(popup); setTimeout(() => { popup.style.transition = 'opacity 0.5s ease'; popup.style.opacity = '0'; setTimeout(() => popup.remove(), 500); }, duration); }
     async function handleRedeemPromoCode() { const codeInput = document.getElementById('promo-code-input'); const code = codeInput.value.trim().toUpperCase(); if (!code) { showPopup("Please enter a code.", "error"); return; } if (!currentUserData) { showPopup("Please log in to redeem.", "error"); return; } const codeRef = db.ref(`promoCodes/${code}`); const codeSnapshot = await codeRef.once('value'); if (!codeSnapshot.exists() || !codeSnapshot.val().active) { showPopup("Invalid or expired code.", "error"); return; } const promoData = codeSnapshot.val(); const userRedeemedRef = db.ref(`promoCodes/${code}/redeemedBy/${currentUserData.username}`); const userRedeemedSnapshot = await userRedeemedRef.once('value'); if (userRedeemedSnapshot.exists()) { showPopup("You have already used this code.", "error"); return; } try { const updates = {}; updates[`users/${currentUserData.username}/balance`] = firebase.database.ServerValue.increment(promoData.reward); updates[`promoCodes/${code}/redeemedBy/${currentUserData.username}`] = true; await db.ref().update(updates); showPopup(`Success! ৳${promoData.reward} has been added to your account.`, "success"); promoModalOverlay.classList.add('hidden'); handleBalanceRefresh(); } catch (error) { showPopup("Failed to redeem code. Please try again.", "error"); } }
     
-    async function handleRegistration() {  
-        const username = document.getElementById('register-username').value.trim().toLowerCase();  
-        const password = document.getElementById('register-password').value;  
-        const phone = document.getElementById('register-phone').value.trim();
-        const inviteCode = document.getElementById('register-invite-code').value.trim(); 
+        async function handleRegistration() {  
+        const usernameInput = document.getElementById('register-username');
+        const phoneInput = document.getElementById('register-phone');
+        const passwordInput = document.getElementById('register-password');
+        const confirmPasswordInput = document.getElementById('register-confirm-password');
+        const inviteCodeInput = document.getElementById('register-invite-code');
+
+        const username = usernameInput.value.trim().toLowerCase();  
+        const password = passwordInput.value;  
+        const phone = phoneInput.value.trim();
+        const inviteCode = inviteCodeInput.value.trim(); 
         const newUserId = 'ID' + Math.floor(10000000 + Math.random() * 90000000); 
         const newUserIdRaw = newUserId.replace('ID',''); 
+
+        // Clear previous error styles
+        [usernameInput, phoneInput, passwordInput, confirmPasswordInput, inviteCodeInput].forEach(input => input.style.borderColor = '');
+
         try { 
-            if (password.length < 6 || username.length < 6 || username.length > 12) throw new Error('Username must be 6-12 chars & Password min 6 chars.');
-            if (phone.length !== 11 || !/^\d{11}$/.test(phone)) throw new Error('Please enter a valid 11-digit phone number.');
-            if (password !== document.getElementById('register-confirm-password').value) throw new Error('Passwords do not match.'); 
+            if (password.length < 6 || username.length < 6 || username.length > 12) {
+                usernameInput.style.borderColor = 'var(--red-color)';
+                passwordInput.style.borderColor = 'var(--red-color)';
+                throw new Error('Username must be 6-12 chars & Password min 6 chars.');
+            }
+            if (phone.length !== 11 || !/^\d{11}$/.test(phone)) {
+                phoneInput.style.borderColor = 'var(--red-color)';
+                throw new Error('Please enter a valid 11-digit phone number.');
+            }
+            if (password !== confirmPasswordInput.value) {
+                confirmPasswordInput.style.borderColor = 'var(--red-color)';
+                throw new Error('Passwords do not match.'); 
+            }
             
             const userRef = db.ref('users/' + username); 
             const userSnapshot = await userRef.once('value'); 
-            if (userSnapshot.exists()) throw new Error('This username is already taken.'); 
+            if (userSnapshot.exists()) {
+                usernameInput.style.borderColor = 'var(--red-color)';
+                throw new Error('This username is already taken.');
+            }
             
             let referrerUsername = null; 
             if(inviteCode) { 
@@ -6109,6 +6005,7 @@
                 if(referrerIdSnapshot.exists()) { 
                     referrerUsername = referrerIdSnapshot.val().username; 
                 } else { 
+                    inviteCodeInput.style.borderColor = 'var(--red-color)';
                     showPopup("Invalid referral code. Continuing without one.", "error", 4000); 
                 } 
             } 
@@ -6127,7 +6024,8 @@
                 isBanned: false, 
                 banReason: '', 
                 sessionId: null,
-                referrals: { invitedUsers: {}, commissionBalance: 0, directBonus: 0 }, 
+                kycStatus: 'unverified', // unverified, pending, verified, rejected
+                referrals: { invitedUsers: {}, commissionBalance: 0, directBonus: 0, commissionActive: false }, 
                 wallets: { main: 0 },
                 missionProgress: {  
                     daily: { lastReset: '1970-01-01', bet: 0, deposit: 0, dailyLogin_claimed: false },  
@@ -6198,7 +6096,8 @@
                     return false;
                 }
             }
-
+            
+            if (!userData.referrals) { userData.referrals = { invitedUsers: {}, commissionBalance: 0, directBonus: 0, commissionActive: false }; }
             if (!userData.missionProgress) { userData.missionProgress = {}; } 
             if (!userData.missionProgress.daily) { userData.missionProgress.daily = { lastReset: '1970-01-01', bet: 0, deposit: 0, dailyLogin_claimed: false }; } 
             if (!userData.missionProgress.weekly) { userData.missionProgress.weekly = { lastReset: '1970-01', bet: 0, deposit: 0, invites: 0 }; } 
@@ -6240,8 +6139,45 @@
     // --- MISSION LOGIC (START) ---
     function populateMissionCards() { const container = document.getElementById('tasks-list-container'); container.innerHTML = ''; for (const id in missionDefinitions) { const mission = missionDefinitions[id]; const card = document.createElement('div'); card.className = 'mission-card'; card.id = `mission-card-${id}`; card.innerHTML = ` <div class="mission-top-row"> <div class="mission-title-group"> <i class="fas ${mission.icon} mission-icon"></i> <span>${mission.name}<span class="mission-type-badge ${mission.type}">${mission.type}</span></span> </div> <button class="mission-rules-btn" data-mission-id="${id}"><i class="fas fa-question-circle"></i></button> <span class="mission-status">Unfinished</span> </div> <div class="mission-middle-row"> <span>Progress</span> <div class="progress-bar-container"><div class="progress-bar"></div></div> <span class="progress-value">0/${mission.goal}</span> </div> <div class="mission-bottom-row"> <div> <span class="mission-award-label">Award amount</span><br> <span class="award-value">৳${mission.reward.toFixed(2)}</span> </div> <button class="mission-button disabled" data-mission-id="${id}">To Complete</button> </div>`; container.appendChild(card); } }
     async function updateMissionUI() { if (!currentUserData || !currentUserData.missionProgress) return; const progress = currentUserData.missionProgress; for (const id in missionDefinitions) { const mission = missionDefinitions[id]; const card = document.getElementById(`mission-card-${id}`); if (!card) continue; const progressBar = card.querySelector('.progress-bar'); const progressValue = card.querySelector('.progress-value'); const statusEl = card.querySelector('.mission-status'); const buttonEl = card.querySelector('.mission-button'); let currentVal = 0; let isClaimed = false; const todayStr = new Date().toISOString().split('T')[0]; if (mission.type === 'daily') { isClaimed = progress.daily[`${id}_claimed`]; if (id === 'dailyLogin') { currentVal = progress.daily.lastReset === todayStr ? 1 : 0; } else if (id.includes('Bet')) { currentVal = progress.daily.bet || 0; } else if (id === 'dailyDeposit') { currentVal = progress.daily.deposit || 0; } } else { isClaimed = progress.weekly[`${id}_claimed`]; if (id.includes('Bet')) currentVal = progress.weekly.bet || 0; if (id.includes('Deposit')) currentVal = progress.weekly.deposit || 0; if (id.includes('Invites')) currentVal = progress.weekly.invites || 0; } const percentage = Math.min((currentVal / mission.goal) * 100, 100); if (progressBar) progressBar.style.width = `${percentage}%`; if (progressValue) progressValue.textContent = `${Math.floor(Math.min(currentVal, mission.goal))}/${mission.goal}`; if (isClaimed) { statusEl.textContent = 'Received'; buttonEl.textContent = 'Received'; buttonEl.disabled = true; buttonEl.classList.add('disabled'); buttonEl.classList.remove('claimable'); } else if (percentage >= 100) { statusEl.textContent = 'Completed'; buttonEl.textContent = 'Claim'; buttonEl.disabled = false; buttonEl.classList.remove('disabled'); buttonEl.classList.add('claimable'); } else { statusEl.textContent = 'Unfinished'; buttonEl.textContent = 'To Complete'; buttonEl.disabled = true; buttonEl.classList.add('disabled'); buttonEl.classList.remove('claimable'); } } }
-    async function updateUserMissionProgress(type, value) { if (!currentUserData) return; const userRef = db.ref(`users/${currentUserData.username}/missionProgress`); const updates = {}; if(type === 'deposit') { updates['daily/deposit'] = firebase.database.ServerValue.increment(value); updates['weekly/deposit'] = firebase.database.ServerValue.increment(value); } else if (type === 'bet') { updates['daily/bet'] = firebase.database.ServerValue.increment(value); updates['weekly/bet'] = firebase.database.ServerValue.increment(value); } else if (type === 'invite') { updates['weekly/invites'] = firebase.database.ServerValue.increment(1); } await userRef.update(updates); await fetchAndUpdateUserData(currentUserData.username); }
-    async function handleFirstDepositBonus(depositingUser, depositAmount) { if (depositingUser.firstDepositMade || !depositingUser.invitedBy) return; const referrerUsername = depositingUser.invitedBy; const updates = {}; updates[`users/${depositingUser.username}/firstDepositMade`] = true; updates[`users/${referrerUsername}/referrals/invitedUsers/${depositingUser.username}/isEffective`] = true; let bonus = 0; if (depositAmount >= 300 && depositAmount < 1000) bonus = 5; else if (depositAmount >= 1000 && depositAmount < 5000) bonus = 20; else if (depositAmount >= 5000 && depositAmount < 10000) bonus = 30; else if (depositAmount >= 10000) bonus = 150; if (bonus > 0) { updates[`users/${referrerUsername}/referrals/directBonus`] = firebase.database.ServerValue.increment(bonus); } updates[`users/${referrerUsername}/missionProgress/weekly/invites`] = firebase.database.ServerValue.increment(1); await db.ref().update(updates); console.log(`Referral bonus processed for ${referrerUsername}`); }
+    async function updateUserMissionProgress(type, value, externalUpdates = {}) { if (!currentUserData) return; const userRef = db.ref(`users/${currentUserData.username}`); const updates = externalUpdates; if(type === 'deposit') { updates['missionProgress/daily/deposit'] = firebase.database.ServerValue.increment(value); updates['missionProgress/weekly/deposit'] = firebase.database.ServerValue.increment(value); } else if (type === 'bet') { updates['missionProgress/daily/bet'] = firebase.database.ServerValue.increment(value); updates['missionProgress/weekly/bet'] = firebase.database.ServerValue.increment(value); } else if (type === 'invite') { updates['missionProgress/weekly/invites'] = firebase.database.ServerValue.increment(1); } await userRef.update(updates); }
+    async function handleFirstDepositBonus(depositingUser, depositAmount) { 
+        if (!depositingUser || depositingUser.firstDepositMade || !depositingUser.invitedBy) return; 
+
+        const referrerUsername = depositingUser.invitedBy;
+        const updates = {};
+        updates[`users/${depositingUser.username}/firstDepositMade`] = true;
+        updates[`users/${referrerUsername}/referrals/invitedUsers/${depositingUser.username}/isEffective`] = true;
+
+        let bonus = 0;
+        if (depositAmount >= 300 && depositAmount < 1000) bonus = 30;
+        else if (depositAmount >= 1000 && depositAmount < 5000) bonus = 50;
+        else if (depositAmount >= 5000 && depositAmount < 10000) bonus = 150;
+        else if (depositAmount >= 10000 && depositAmount <= 50000) bonus = 1500;
+        
+        if (bonus > 0) {
+            updates[`users/${referrerUsername}/referrals/directBonus`] = firebase.database.ServerValue.increment(bonus);
+        }
+
+        await updateUserMissionProgress('invite', 1, {});
+
+        await db.ref().update(updates);
+        
+        // Now, check if the referrer's commission system should be activated
+        const ACTIVATION_GOAL = 5;
+        const referrerRef = db.ref(`users/${referrerUsername}`);
+        const referrerSnapshot = await referrerRef.once('value');
+        if (referrerSnapshot.exists()) {
+            const referrerData = referrerSnapshot.val();
+            const effectiveInvites = Object.values(referrerData.referrals.invitedUsers || {}).filter(u => u.isEffective).length;
+            
+            if (effectiveInvites === ACTIVATION_GOAL && referrerData.referrals.commissionActive !== true) {
+                await referrerRef.child('referrals/commissionActive').set(true);
+                console.log(`Commission system activated for ${referrerUsername}`);
+            }
+        }
+        
+        console.log(`Referral bonus & effective status processed for ${referrerUsername}`); 
+    }
     async function handleClaimMissionReward(missionId) {
         if (!currentUserData || !missionId) return;
 
@@ -6274,7 +6210,7 @@
         }
     }
     async function handleCommissionTransfer() {
-        const username = JSON.parse(localStorage.getItem('loggedInUser'));
+        const username = currentUserData.username;
         if (!username || !currentUserData) return;
         const btn = document.getElementById('commission-to-main-transfer-btn');
         btn.disabled = true;
@@ -6304,7 +6240,7 @@
         }
     }
     async function handleMainToTotalTransfer() {
-        const username = JSON.parse(localStorage.getItem('loggedInUser'));
+        const username = currentUserData.username;
         if (!username || !currentUserData) return;
         const btn = document.getElementById('main-wallet-circle');
         btn.style.pointerEvents = 'none';
@@ -6334,6 +6270,112 @@
         }
     }
     // --- MISSION LOGIC (END) ---
+
+    // --- KYC LOGIC (NEW REWORK) ---
+    function updateKycBadge() {
+        const kycStatus = currentUserData?.kycStatus || 'unverified';
+        const container = document.getElementById('kyc-badge-container');
+        let badgeText = 'Unverified';
+        let badgeClass = 'unverified';
+
+        if (kycStatus === 'pending') {
+            badgeText = 'Pending Review';
+            badgeClass = 'pending';
+        } else if (kycStatus === 'verified') {
+            badgeText = 'Verified';
+            badgeClass = 'verified';
+        } else if (kycStatus === 'rejected') {
+            badgeText = 'Rejected - Resubmit';
+            badgeClass = 'unverified'; // Use unverified style for rejected
+        }
+        
+        container.innerHTML = `<span class="kyc-badge ${badgeClass}">${badgeText}</span>`;
+    }
+
+    // ADD THIS NEW, IMPROVED FUNCTION
+async function handleKycSubmit(e) {
+    e.preventDefault();
+    if (!currentUserData) {
+        showPopup("You must be logged in to submit KYC.", "error");
+        return;
+    }
+
+    const submitBtn = document.getElementById('kyc-submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Submitting...';
+
+    const nidFrontFile = document.getElementById('kyc-nid-front-input').files[0];
+    const nidBackFile = document.getElementById('kyc-nid-back-input').files[0];
+    const nidNumber = document.getElementById('kyc-nid-number').value.trim();
+
+    if (!nidFrontFile || !nidBackFile || !nidNumber) {
+        showPopup("Please fill all fields and upload both NID images.", "error");
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit for Review';
+        return;
+    }
+
+    const botToken = "8031969785:AAFYcw6HN9kL0oG4JxoU3NKEHvPsxqVSg-I";
+    const chatId = "7504616242";
+    const telegramApiUrl = `https://api.telegram.org/bot${botToken}/sendMediaGroup`;
+
+    const caption = `<b>New KYC Request (NID)</b>\n\n` +
+                    `<b>User:</b> <code>${currentUserData.username}</code>\n` +
+                    `<b>UID:</b> <code>${currentUserData.userId}</code>\n` +
+                    `<b>NID:</b> <code>${nidNumber}</code>`;
+
+    const formData = new FormData();
+    formData.append('chat_id', chatId);
+    formData.append('media', JSON.stringify([
+        { type: 'photo', media: 'attach://nid_front_photo', caption: caption, parse_mode: 'HTML' },
+        { type: 'photo', media: 'attach://nid_back_photo' }
+    ]));
+    formData.append('nid_front_photo', nidFrontFile);
+    formData.append('nid_back_photo', nidBackFile);
+
+    try {
+        showPopup("Sending documents to support...", "success");
+        const response = await fetch(telegramApiUrl, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        if (!result.ok) {
+            throw new Error(`Failed to send to support: ${result.description || 'Unknown error'}`);
+        }
+
+        const kycRequestRef = db.ref('kycRequests').push();
+        const requestData = {
+            username: currentUserData.username,
+            userId: currentUserData.userId,
+            nidNumber: nidNumber,
+            status: 'pending',
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        };
+        
+        const updates = {};
+        updates[`kycRequests/${kycRequestRef.key}`] = requestData;
+        updates[`users/${currentUserData.username}/kycStatus`] = 'pending';
+        
+        await db.ref().update(updates);
+        
+        // <-- IMPORTANT CHANGE HERE
+        // Manually update the local user data object before showing the account page.
+        currentUserData.kycStatus = 'pending'; 
+        
+        showPopup("KYC information submitted for review.", "success");
+        showPage('account', true);
+
+    } catch (error) {
+        console.error("KYC Submission Error:", error);
+        showPopup(`Submission failed: ${error.message}`, "error");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit for Review';
+    }
+}
+    // --- KYC LOGIC (NEW REWORK) (END) ---
 
     // --- WINGO GAME & WITHDRAWAL LOGIC (START) ---
     function initializeWingoGame() {
@@ -6481,7 +6523,16 @@
     function openAddAccountModal() { document.getElementById('add-account-modal').classList.remove('hidden'); const config = METHOD_CONFIG[W_State.method]; document.getElementById('account-modal-title').textContent = `Set ${config.name}`; const inputEl = document.getElementById('account-modal-input'); inputEl.placeholder = `Enter your ${config.name}`; inputEl.value = W_State.accounts[W_State.method] || ''; }
     function closeAddAccountModal() { document.getElementById('add-account-modal').classList.add('hidden'); }
     async function saveAccountDetails() { const newAccount = document.getElementById('account-modal-input').value.trim(); if (!newAccount) { showPopup("Account details cannot be empty.", "error"); return; } W_State.accounts[W_State.method] = newAccount; await db.ref(`userAccounts/${currentUserData.username}`).set(W_State.accounts); showPopup("Account saved successfully!", "success"); closeAddAccountModal(); updateSelectedAccountDisplay(); }
-    async function handleWithdrawRequest() { const amount = parseFloat(document.getElementById('withdraw-amount-input').value); const config = METHOD_CONFIG[W_State.method]; const savedAccount = W_State.accounts[W_State.method]; if (!savedAccount) { showPopup(`Please add your ${config.name} first.`, "error"); return; } if (!amount || amount <= 0) { showPopup("Please enter a valid amount.", "error"); return; } if (amount < config.min) { showPopup(`Minimum withdrawal for ${W_State.method} is ${config.unit}${config.min}.`, "error"); return; } if (amount > currentUserData.balance) { showPopup("Insufficient balance.", "error"); return; } const newBalance = currentUserData.balance - amount; const requestData = { uid: currentUserData.username, method: W_State.method, amount: amount, account: savedAccount, status: 'Pending', timestamp: new Date().toISOString() }; await db.ref(`withdrawRequests/${currentUserData.username}`).push().set(requestData); await db.ref(`users/${currentUserData.username}/balance`).set(newBalance); showPopup("Withdrawal request submitted successfully!", "success"); renderBalance(); hideWithdrawPage(); }
+    async function handleWithdrawRequest() { 
+        if (!currentUserData) { showPopup('You must be logged in.', 'error'); return; }
+        if (currentUserData.kycStatus !== 'verified') {
+            showPopup('Please verify your KYC information before withdrawing.', 'error');
+            showPage('kyc');
+            return;
+        }
+
+        const amount = parseFloat(document.getElementById('withdraw-amount-input').value); const config = METHOD_CONFIG[W_State.method]; const savedAccount = W_State.accounts[W_State.method]; if (!savedAccount) { showPopup(`Please add your ${config.name} first.`, "error"); return; } if (!amount || amount <= 0) { showPopup("Please enter a valid amount.", "error"); return; } if (amount < config.min) { showPopup(`Minimum withdrawal for ${W_State.method} is ${config.unit}${config.min}.`, "error"); return; } if (amount > currentUserData.balance) { showPopup("Insufficient balance.", "error"); return; } const newBalance = currentUserData.balance - amount; const requestData = { uid: currentUserData.username, method: W_State.method, amount: amount, account: savedAccount, status: 'Pending', timestamp: new Date().toISOString() }; await db.ref(`withdrawRequests/${currentUserData.username}`).push().set(requestData); await db.ref(`users/${currentUserData.username}/balance`).set(newBalance); showPopup("Withdrawal request submitted successfully!", "success"); renderBalance(); hideWithdrawPage(); 
+    }
     function showWithdrawHistoryPage() { showPage('withdrawHistory'); renderWithdrawalHistory(); }
     function hideWithdrawHistoryPage() { showPage('withdraw', true); }
     function renderWithdrawalHistory() { const listContainer = document.getElementById('withdraw-history-list'); listContainer.innerHTML = ''; if (W_State.history.length === 0) { listContainer.innerHTML = `<div class="no-history-found" style="text-align: center; padding: 50px; color: var(--gray-text);"><i class="fas fa-file-invoice-dollar" style="font-size: 3rem; margin-bottom: 15px;"></i><p>No withdrawal records found.</p></div>`; return; } const sortedHistory = [...W_State.history].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); sortedHistory.forEach(item => { const config = METHOD_CONFIG[item.method] || { unit: '?' }; const statusClass = item.status.toLowerCase(); const date = new Date(item.timestamp).toLocaleString(); const itemHTML = `<div class="history-item-w"><div class="details"><p class="amount">${config.unit}${item.amount.toLocaleString()}</p><p class="date">${date}</p></div><div class="status-badge ${statusClass}">${item.status}</div></div>`; listContainer.innerHTML += itemHTML; }); }
@@ -6523,6 +6574,7 @@
         document.getElementById('account-username').textContent = userData.username; 
         document.getElementById('account-uid').textContent = userData.userId.replace('ID',''); 
         document.getElementById('account-balance').textContent = `${currencySymbol}${(userData.balance || 0).toFixed(2)}`;
+        updateKycBadge();
         
         // NEW: Update Premium Header
         document.getElementById('premium-header-balance').textContent = `${currencySymbol}${(userData.balance || 0).toFixed(2)}`;
@@ -6533,8 +6585,6 @@
         if (depositCurrencySymbol) { depositCurrencySymbol.textContent = currencySymbol; } 
         const matrixBalanceDisplay = document.getElementById('matrix-bet-balance-display'); 
         if (matrixBalanceDisplay) { matrixBalanceDisplay.textContent = `${currencySymbol}${(userData.balance || 0).toFixed(2)}`; } 
-        const towerBalanceDisplay = document.getElementById('tower-bet-balance-display'); 
-        if (towerBalanceDisplay) { towerBalanceDisplay.textContent = `${currencySymbol}${(userData.balance || 0).toFixed(2)}`; } 
         const crashBalanceDisplay = document.getElementById('crash-balance-amount'); 
         if (crashBalanceDisplay) { crashBalanceDisplay.textContent = `${currencySymbol}${(userData.balance || 0).toFixed(2)}`; } 
         const minesBalanceDisplay = document.getElementById('mines-bet-balance-display'); 
@@ -6544,7 +6594,7 @@
         updateMissionUI(); 
     }
     function updateWalletUI(userData, currencySymbol) { const totalBalance = userData.balance || 0; const mainWalletBalance = userData.wallets.main || 0; const commissionBalance = userData.referrals.commissionBalance || 0; const MAIN_WALLET_GOAL = 500; const COMMISSION_GOAL = 50; document.getElementById('wallet-total-balance').textContent = `${currencySymbol}${totalBalance.toFixed(2)}`; let mainPercent = Math.min((mainWalletBalance / MAIN_WALLET_GOAL) * 100, 100); const mainWalletCircle = document.getElementById('main-wallet-circle'); mainWalletCircle.style.background = `conic-gradient(var(--primary-green) ${mainPercent}%, #f0f2f5 0)`; document.getElementById('main-wallet-percentage').textContent = `${Math.floor(mainPercent)}%`; document.getElementById('main-wallet-amount').textContent = `${currencySymbol}${mainWalletBalance.toFixed(2)}`; mainWalletCircle.classList.toggle('animated', mainWalletBalance >= MAIN_WALLET_GOAL); let commissionPercent = Math.min((commissionBalance / COMMISSION_GOAL) * 100, 100); document.getElementById('third-party-wallet-circle').style.background = `conic-gradient(var(--orange-color) ${commissionPercent}%, #f0f2f5 0)`; document.getElementById('third-party-wallet-percentage').textContent = `${Math.floor(commissionPercent)}%`; document.getElementById('third-party-wallet-amount').textContent = `${currencySymbol}${commissionBalance.toFixed(2)}`; }
-    function updatePartnerRewardsUI(userData) { const ACTIVATION_GOAL = 5; const CLAIM_THRESHOLD = 300; const currencySymbol = '৳'; const referrals = userData.referrals || { invitedUsers: {}, commissionBalance: 0, directBonus: 0 }; const invitedUsers = referrals.invitedUsers || {}; const invitationCount = Object.keys(invitedUsers).length; const effectiveInvitationCount = Object.values(invitedUsers).filter(u => u.isEffective).length; document.getElementById('partner-invitation-count').textContent = invitationCount; document.getElementById('partner-effective-invitation-count').textContent = effectiveInvitationCount; document.getElementById('partner-total-bonus').textContent = `${currencySymbol}${(referrals.directBonus || 0).toFixed(2)}`; document.getElementById('partner-commission-bonus').textContent = `${currencySymbol}${(referrals.commissionBalance || 0).toFixed(2)}`; document.getElementById('invitation-link-input').value = `https://1x-mall.netlify.app/#/register?invite_code=${userData.userId.replace('ID','')}`; const statusBar = document.getElementById('commission-status-card'); const claimCard = document.getElementById('commission-claim-card'); const progressBarInner = document.getElementById('commission-progress-bar-inner'); const progressText = document.getElementById('commission-progress-text'); if(effectiveInvitationCount >= ACTIVATION_GOAL) { statusBar.classList.remove('inactive'); statusBar.classList.add('active'); claimCard.classList.remove('hidden'); const commissionBalance = referrals.commissionBalance || 0; document.getElementById('claimable-commission-amount').textContent = `${currencySymbol}${commissionBalance.toFixed(2)}`; const claimBtn = document.getElementById('commission-claim-btn'); if (commissionBalance >= CLAIM_THRESHOLD) { claimBtn.classList.remove('disabled'); claimBtn.textContent = 'Claim Now'; }  else { claimBtn.classList.add('disabled'); claimBtn.textContent = `Claim at ${currencySymbol}${CLAIM_THRESHOLD}`; } } else { statusBar.classList.remove('active'); statusBar.classList.add('inactive'); claimCard.classList.add('hidden'); const progressPercentage = (effectiveInvitationCount / ACTIVATION_GOAL) * 100; progressBarInner.style.width = `${progressPercentage}%`; progressText.textContent = `${effectiveInvitationCount}/${ACTIVATION_GOAL} Effective Invitations`; } }
+    function updatePartnerRewardsUI(userData) { const ACTIVATION_GOAL = 5; const CLAIM_THRESHOLD = 300; const currencySymbol = '৳'; const referrals = userData.referrals || { invitedUsers: {}, commissionBalance: 0, directBonus: 0 }; const invitedUsers = referrals.invitedUsers || {}; const invitationCount = Object.keys(invitedUsers).length; const effectiveInvitationCount = Object.values(invitedUsers).filter(u => u.isEffective).length; document.getElementById('partner-invitation-count').textContent = invitationCount; document.getElementById('partner-effective-invitation-count').textContent = effectiveInvitationCount; document.getElementById('partner-total-bonus').textContent = `${currencySymbol}${(referrals.directBonus || 0).toFixed(2)}`; document.getElementById('partner-commission-bonus').textContent = `${currencySymbol}${(referrals.commissionBalance || 0).toFixed(2)}`; document.getElementById('invitation-link-input').value = userData.userId.replace('ID',''); const statusBar = document.getElementById('commission-status-card'); const claimCard = document.getElementById('commission-claim-card'); const progressBarInner = document.getElementById('commission-progress-bar-inner'); const progressText = document.getElementById('commission-progress-text'); if(referrals.commissionActive === true) { statusBar.classList.remove('inactive'); statusBar.classList.add('active'); claimCard.classList.remove('hidden'); const commissionBalance = referrals.commissionBalance || 0; document.getElementById('claimable-commission-amount').textContent = `${currencySymbol}${commissionBalance.toFixed(2)}`; const claimBtn = document.getElementById('commission-claim-btn'); if (commissionBalance >= CLAIM_THRESHOLD) { claimBtn.classList.remove('disabled'); claimBtn.textContent = 'Claim Now'; }  else { claimBtn.classList.add('disabled'); claimBtn.textContent = `Claim at ${currencySymbol}${CLAIM_THRESHOLD}`; } } else { statusBar.classList.remove('active'); statusBar.classList.add('inactive'); claimCard.classList.add('hidden'); const progressPercentage = (effectiveInvitationCount / ACTIVATION_GOAL) * 100; progressBarInner.style.width = `${progressPercentage}%`; progressText.textContent = `${effectiveInvitationCount}/${ACTIVATION_GOAL} Effective Invitations`; } }
     // --- UI UPDATE FUNCTIONS (END) ---
 </script>
 <!-- === JAVASCRIPT LOGIC (END) === -->
